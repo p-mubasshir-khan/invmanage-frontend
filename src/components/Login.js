@@ -23,7 +23,11 @@ const Login = ({ onLogin }) => {
     setError('');
 
     try {
-      const response = await axios.post('/api/login', credentials);
+     const response = await axios.post(
+  `${process.env.NEXT_PUBLIC_API_BASE}/login`,
+  credentials
+);
+
       if (response.data.success) {
         onLogin();
       }
