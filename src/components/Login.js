@@ -23,8 +23,8 @@ const Login = ({ onLogin }) => {
     setError('');
 
     try {
-     const response = await axios.post(
-  `${process.env.NEXT_PUBLIC_API_BASE}/login`,
+    const response = await axios.post(
+  `${process.env.NEXT_PUBLIC_API_BASE}/api/login`,  // <-- add /api
   credentials
 );
 
