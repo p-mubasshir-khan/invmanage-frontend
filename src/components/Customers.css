@@ -1,0 +1,18 @@
+.customers {
+  padding: 20px 0;
+}
+
+.customers-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+  .customers-header {
+    flex-direction: column;
+    gap: 15px;
+    align-items: stretch;
+  }
+}

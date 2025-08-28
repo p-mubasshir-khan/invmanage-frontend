@@ -1,0 +1,33 @@
+.dashboard {
+  padding: 20px 0;
+}
+
+.dashboard-content {
+  display: grid;
+  gap: 20px;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  font-size: 18px;
+  color: #666;
+}
+
+.dashboard h2 {
+  margin-bottom: 15px;
+  color: #333;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.dashboard p {
+  color: #666;
+  font-style: italic;
+}
+
+@media (min-width: 768px) {
+  .dashboard-content {
+    grid-template-columns: 1fr 1fr;
+  }
+}
