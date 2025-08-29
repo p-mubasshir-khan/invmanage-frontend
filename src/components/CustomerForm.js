@@ -11,24 +11,33 @@ const CustomerForm = ({ customer, onSubmit, onClose }) => {
   useEffect(() => {
     if (customer) {
       setFormData({
-        name: customer.name,
-        contact: customer.contact,
-        address: customer.address
+        name: customer?.name || '',
+        contact: customer?.contact || '',
+        address: customer?.address || ''
       });
     }
   }, [customer]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
+    setFormData(prev => ({
+      ...prev,
       [name]: value
-    });
+    }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formData);
+
+    // Ensure all fields are filled with safe defaults
+    const payload = {
+      name: formData.name?.trim() || '',
+      contact: formData.contact?.trim() || '',
+      address: formData.address?.trim() || ''
+    };
+
+    // Send to parent handler
+    onSubmit(payload);
   };
 
   return (
