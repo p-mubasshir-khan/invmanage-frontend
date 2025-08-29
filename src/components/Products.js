@@ -17,7 +17,7 @@ const Products = () => {
   const fetchProducts = async () => {
     try {
       const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/products`);
-      setProducts(response.data);
+      setProducts(Array.isArray(response?.data) ? response.data : []);
     } catch (error) {
       console.error('Error fetching products:', error);
       setMessage('Error loading products');
@@ -32,15 +32,16 @@ const Products = () => {
   };
 
   const handleEditProduct = (product) => {
-    setEditingProduct(product);
+    setEditingProduct(product || null);
     setShowForm(true);
   };
 
   const handleDeleteProduct = async (productId) => {
+    if (!productId) return;
     if (window.confirm('Are you sure you want to delete this product?')) {
       try {
         await axios.delete(`${process.env.REACT_APP_API_URL}/api/products/${productId}`);
-        setProducts(products.filter(p => p.id !== productId));
+        setProducts(products?.filter(p => p?.id !== productId) || []);
         setMessage('Product deleted successfully');
         setTimeout(() => setMessage(''), 3000);
       } catch (error) {
@@ -52,16 +53,18 @@ const Products = () => {
   };
 
   const handleFormSubmit = async (productData) => {
+    if (!productData) return;
     try {
-      if (editingProduct) {
-        // Update existing product
-        const response = await axios.put(`${process.env.REACT_APP_API_URL}/api/products/${editingProduct.id}`, productData);
-        setProducts(products.map(p => p.id === editingProduct.id ? response.data : p));
+      if (editingProduct?.id) {
+        const response = await axios.put(
+          `${process.env.REACT_APP_API_URL}/api/products/${editingProduct.id}`,
+          productData
+        );
+        setProducts(products?.map(p => (p?.id === editingProduct.id ? response?.data : p)) || []);
         setMessage('Product updated successfully');
       } else {
-        // Create new product
         const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/products`, productData);
-        setProducts([...products, response.data]);
+        setProducts([...(products || []), response?.data]);
         setMessage('Product added successfully');
       }
       setShowForm(false);
@@ -93,7 +96,7 @@ const Products = () => {
       </div>
 
       {message && (
-        <div className={`alert ${message.includes('Error') ? 'alert-danger' : 'alert-success'}`}>
+        <div className={`alert ${message?.includes('Error') ? 'alert-danger' : 'alert-success'}`}>
           {message}
         </div>
       )}
@@ -110,14 +113,14 @@ const Products = () => {
             </tr>
           </thead>
           <tbody>
-            {products.map(product => (
-              <tr key={product.id}>
-                <td>{product.name}</td>
-                <td className={product.quantity < product.reorder_threshold ? 'low-stock' : ''}>
-                  {product.quantity}
+            {(Array.isArray(products) ? products : []).map(product => (
+              <tr key={product?.id || Math.random()}>
+                <td>{product?.name || '-'}</td>
+                <td className={product?.quantity < product?.reorder_threshold ? 'low-stock' : ''}>
+                  {product?.quantity ?? '-'}
                 </td>
-                <td>₹{product.price.toFixed(2)}</td>
-                <td>{product.reorder_threshold}</td>
+                <td>₹{product?.price?.toFixed(2) ?? '-'}</td>
+                <td>{product?.reorder_threshold ?? '-'}</td>
                 <td>
                   <button
                     onClick={() => handleEditProduct(product)}
@@ -126,7 +129,7 @@ const Products = () => {
                     Edit
                   </button>
                   <button
-                    onClick={() => handleDeleteProduct(product.id)}
+                    onClick={() => handleDeleteProduct(product?.id)}
                     className="btn btn-danger btn-sm"
                     style={{ marginLeft: '8px' }}
                   >
@@ -141,7 +144,7 @@ const Products = () => {
 
       {showForm && (
         <ProductForm
-          product={editingProduct}
+          product={editingProduct || null}
           onSubmit={handleFormSubmit}
           onClose={handleFormClose}
         />
