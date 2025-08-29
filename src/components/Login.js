@@ -23,17 +23,20 @@ const Login = ({ onLogin }) => {
     setError('');
 
     try {
-   const response = await axios.post(
-  `${process.env.NEXT_PUBLIC_API_BASE}/login`,
-  credentials
-);
+      const response = await axios.post(
+        "https://invmanage-backend.onrender.com/api/login",
+        credentials
+      );
 
-
+      // ✅ Expecting backend to return JSON like { success: true, token: "...", username: "admin" }
       if (response.data.success) {
-        onLogin();
+        onLogin(response.data);  // Pass data to parent (App.js or Dashboard)
+      } else {
+        setError(response.data.message || "Invalid username or password");
       }
     } catch (error) {
-      setError('Invalid username or password');
+      console.error("Login error:", error);
+      setError("Login failed. Please try again.");
     } finally {
       setLoading(false);
     }
