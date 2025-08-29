@@ -16,7 +16,7 @@ const Customers = () => {
 
   const fetchCustomers = async () => {
     try {
-      const response = await axios.get('/api/customers');
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/customers`);
       setCustomers(response.data);
     } catch (error) {
       console.error('Error fetching customers:', error);
@@ -39,7 +39,7 @@ const Customers = () => {
   const handleDeleteCustomer = async (customerId) => {
     if (window.confirm('Are you sure you want to delete this customer?')) {
       try {
-        await axios.delete(`/api/customers/${customerId}`);
+        await axios.delete(`${process.env.REACT_APP_API_URL}/api/customers/${customerId}`);
         setCustomers(customers.filter(c => c.id !== customerId));
         setMessage('Customer deleted successfully');
         setTimeout(() => setMessage(''), 3000);
@@ -55,12 +55,12 @@ const Customers = () => {
     try {
       if (editingCustomer) {
         // Update existing customer
-        const response = await axios.put(`/api/customers/${editingCustomer.id}`, customerData);
+        const response = await axios.put(`${process.env.REACT_APP_API_URL}/api/customers/${editingCustomer.id}`, customerData);
         setCustomers(customers.map(c => c.id === editingCustomer.id ? response.data : c));
         setMessage('Customer updated successfully');
       } else {
         // Create new customer
-        const response = await axios.post('/api/customers', customerData);
+        const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/customers`, customerData);
         setCustomers([...customers, response.data]);
         setMessage('Customer added successfully');
       }
