@@ -3,6 +3,7 @@ import axios from 'axios';
 import './Dashboard.css';
 
 const Dashboard = () => {
+  // Initialize state safely
   const [dashboardData, setDashboardData] = useState({
     total_products: 0,
     low_stock_count: 0,
@@ -10,6 +11,7 @@ const Dashboard = () => {
   });
   const [lowStockProducts, setLowStockProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     fetchDashboardData();
@@ -17,44 +19,57 @@ const Dashboard = () => {
 
   const fetchDashboardData = async () => {
     try {
+      const dashboardUrl = `${process.env.REACT_APP_API_URL}/api/dashboard`;
+      const lowStockUrl = `${process.env.REACT_APP_API_URL}/api/dashboard/low-stock`;
+
       const [dashboardResponse, lowStockResponse] = await Promise.all([
-        axios.get(`${process.env.REACT_APP_API_URL}/api/dashboard`),
-        axios.get(`${process.env.REACT_APP_API_URL}/api/dashboard/low-stock`)
+        axios.get(dashboardUrl),
+        axios.get(lowStockUrl)
       ]);
 
-      setDashboardData(dashboardResponse.data);
-      setLowStockProducts(lowStockResponse.data);
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error);
+      // Set state safely with fallback defaults
+      setDashboardData({
+        total_products: dashboardResponse?.data?.total_products || 0,
+        low_stock_count: dashboardResponse?.data?.low_stock_count || 0,
+        recent_orders: dashboardResponse?.data?.recent_orders || []
+      });
+
+      setLowStockProducts(lowStockResponse?.data || []);
+    } catch (err) {
+      console.error('Error fetching dashboard data:', err);
+      setError('Failed to load dashboard data. Please try again later.');
     } finally {
       setLoading(false);
     }
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString();
+    return dateString ? new Date(dateString).toLocaleDateString() : '-';
   };
 
-  if (loading) {
-    return <div className="loading">Loading dashboard...</div>;
-  }
+  if (loading) return <div className="loading">Loading dashboard...</div>;
+  if (error) return <div className="error">{error}</div>;
+
+  const totalProducts = dashboardData?.total_products || 0;
+  const lowStockCount = dashboardData?.low_stock_count || 0;
+  const recentOrders = dashboardData?.recent_orders || [];
 
   return (
     <div className="dashboard">
       <h1 className="page-title">Dashboard</h1>
-      
+
       {/* Statistics Cards */}
       <div className="stats-grid">
         <div className="stat-card">
-          <div className="stat-number">{dashboardData.total_products}</div>
+          <div className="stat-number">{totalProducts}</div>
           <div className="stat-label">Total Products</div>
         </div>
         <div className="stat-card">
-          <div className="stat-number">{dashboardData.low_stock_count}</div>
+          <div className="stat-number">{lowStockCount}</div>
           <div className="stat-label">Low Stock Items</div>
         </div>
         <div className="stat-card">
-          <div className="stat-number">{dashboardData.recent_orders.length}</div>
+          <div className="stat-number">{recentOrders.length}</div>
           <div className="stat-label">Recent Orders</div>
         </div>
       </div>
@@ -73,11 +88,11 @@ const Dashboard = () => {
                 </tr>
               </thead>
               <tbody>
-                {lowStockProducts.map(product => (
-                  <tr key={product.id}>
-                    <td>{product.name}</td>
-                    <td className="low-stock">{product.quantity}</td>
-                    <td>{product.reorder_threshold}</td>
+                {lowStockProducts.map((product) => (
+                  <tr key={product?.id || Math.random()}>
+                    <td>{product?.name || '-'}</td>
+                    <td className="low-stock">{product?.quantity ?? '-'}</td>
+                    <td>{product?.reorder_threshold ?? '-'}</td>
                   </tr>
                 ))}
               </tbody>
@@ -90,7 +105,7 @@ const Dashboard = () => {
         {/* Recent Orders */}
         <div className="card">
           <h2>Recent Orders</h2>
-          {dashboardData.recent_orders.length > 0 ? (
+          {recentOrders.length > 0 ? (
             <table className="table">
               <thead>
                 <tr>
@@ -102,13 +117,13 @@ const Dashboard = () => {
                 </tr>
               </thead>
               <tbody>
-                {dashboardData.recent_orders.map(order => (
-                  <tr key={order.id}>
-                    <td>#{order.id}</td>
-                    <td>{order.product_name}</td>
-                    <td>{order.quantity}</td>
-                    <td>₹{order.total_amount.toFixed(2)}</td>
-                    <td>{formatDate(order.created_at)}</td>
+                {recentOrders.map((order) => (
+                  <tr key={order?.id || Math.random()}>
+                    <td>#{order?.id || '-'}</td>
+                    <td>{order?.product_name || '-'}</td>
+                    <td>{order?.quantity ?? '-'}</td>
+                    <td>₹{order?.total_amount?.toFixed(2) ?? '0.00'}</td>
+                    <td>{formatDate(order?.created_at)}</td>
                   </tr>
                 ))}
               </tbody>
