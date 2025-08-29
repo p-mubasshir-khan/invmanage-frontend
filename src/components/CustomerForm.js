@@ -11,93 +11,61 @@ const CustomerForm = ({ customer, onSubmit, onClose }) => {
   useEffect(() => {
     if (customer) {
       setFormData({
-        name: customer?.name || '',
-        contact: customer?.contact || '',
-        address: customer?.address || ''
+        name: customer.name || '',
+        contact: customer.contact || '',
+        address: customer.address || ''
       });
     }
   }, [customer]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    // Ensure all fields are filled with safe defaults
-    const payload = {
-      name: formData.name?.trim() || '',
-      contact: formData.contact?.trim() || '',
-      address: formData.address?.trim() || ''
-    };
-
-    // Send to parent handler
-    onSubmit(payload);
+    if (onSubmit) onSubmit(formData);
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="modal">
-        <div className="modal-header">
-          <h2 className="modal-title">
-            {customer ? 'Edit Customer' : 'Add New Customer'}
-          </h2>
-          <button onClick={onClose} className="close-btn">&times;</button>
+    <div className="customer-form">
+      <form onSubmit={handleSubmit}>
+        <label>
+          Name:
+          <input 
+            type="text" 
+            name="name" 
+            value={formData.name} 
+            onChange={handleChange} 
+          />
+        </label>
+
+        <label>
+          Contact:
+          <input 
+            type="text" 
+            name="contact" 
+            value={formData.contact} 
+            onChange={handleChange} 
+          />
+        </label>
+
+        <label>
+          Address:
+          <input 
+            type="text" 
+            name="address" 
+            value={formData.address} 
+            onChange={handleChange} 
+          />
+        </label>
+
+        <div className="form-buttons">
+          <button type="submit">Save</button>
+          <button type="button" onClick={onClose}>Cancel</button>
         </div>
-        
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="name">Customer Name</label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          
-          <div className="form-group">
-            <label htmlFor="contact">Contact</label>
-            <input
-              type="text"
-              id="contact"
-              name="contact"
-              value={formData.contact}
-              onChange={handleChange}
-              placeholder="Email or phone number"
-              required
-            />
-          </div>
-          
-          <div className="form-group">
-            <label htmlFor="address">Address</label>
-            <input
-              type="text"
-              id="address"
-              name="address"
-              value={formData.address}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          
-          <div className="form-actions">
-            <button type="button" onClick={onClose} className="btn btn-outline">
-              Cancel
-            </button>
-            <button type="submit" className="btn btn-primary">
-              {customer ? 'Update Customer' : 'Add Customer'}
-            </button>
-          </div>
-        </form>
-      </div>
+      </form>
     </div>
   );
 };
