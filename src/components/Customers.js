@@ -17,7 +17,7 @@ const Customers = () => {
   const fetchCustomers = async () => {
     try {
       const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/customers`);
-      setCustomers(response.data);
+      setCustomers(Array.isArray(response?.data) ? response.data : []);
     } catch (error) {
       console.error('Error fetching customers:', error);
       setMessage('Error loading customers');
@@ -32,15 +32,16 @@ const Customers = () => {
   };
 
   const handleEditCustomer = (customer) => {
-    setEditingCustomer(customer);
+    setEditingCustomer(customer || null);
     setShowForm(true);
   };
 
   const handleDeleteCustomer = async (customerId) => {
+    if (!customerId) return;
     if (window.confirm('Are you sure you want to delete this customer?')) {
       try {
         await axios.delete(`${process.env.REACT_APP_API_URL}/api/customers/${customerId}`);
-        setCustomers(customers.filter(c => c.id !== customerId));
+        setCustomers((customers || []).filter(c => c?.id !== customerId));
         setMessage('Customer deleted successfully');
         setTimeout(() => setMessage(''), 3000);
       } catch (error) {
@@ -52,16 +53,18 @@ const Customers = () => {
   };
 
   const handleFormSubmit = async (customerData) => {
+    if (!customerData) return;
     try {
-      if (editingCustomer) {
-        // Update existing customer
-        const response = await axios.put(`${process.env.REACT_APP_API_URL}/api/customers/${editingCustomer.id}`, customerData);
-        setCustomers(customers.map(c => c.id === editingCustomer.id ? response.data : c));
+      if (editingCustomer?.id) {
+        const response = await axios.put(
+          `${process.env.REACT_APP_API_URL}/api/customers/${editingCustomer.id}`,
+          customerData
+        );
+        setCustomers((customers || []).map(c => (c?.id === editingCustomer.id ? response?.data : c)));
         setMessage('Customer updated successfully');
       } else {
-        // Create new customer
         const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/customers`, customerData);
-        setCustomers([...customers, response.data]);
+        setCustomers([...(customers || []), response?.data]);
         setMessage('Customer added successfully');
       }
       setShowForm(false);
@@ -93,7 +96,7 @@ const Customers = () => {
       </div>
 
       {message && (
-        <div className={`alert ${message.includes('Error') ? 'alert-danger' : 'alert-success'}`}>
+        <div className={`alert ${message?.includes('Error') ? 'alert-danger' : 'alert-success'}`}>
           {message}
         </div>
       )}
@@ -109,11 +112,11 @@ const Customers = () => {
             </tr>
           </thead>
           <tbody>
-            {customers.map(customer => (
-              <tr key={customer.id}>
-                <td>{customer.name}</td>
-                <td>{customer.contact}</td>
-                <td>{customer.address}</td>
+            {(Array.isArray(customers) ? customers : []).map(customer => (
+              <tr key={customer?.id || Math.random()}>
+                <td>{customer?.name ?? '-'}</td>
+                <td>{customer?.contact ?? '-'}</td>
+                <td>{customer?.address ?? '-'}</td>
                 <td>
                   <button
                     onClick={() => handleEditCustomer(customer)}
@@ -122,7 +125,7 @@ const Customers = () => {
                     Edit
                   </button>
                   <button
-                    onClick={() => handleDeleteCustomer(customer.id)}
+                    onClick={() => handleDeleteCustomer(customer?.id)}
                     className="btn btn-danger btn-sm"
                     style={{ marginLeft: '8px' }}
                   >
@@ -137,7 +140,7 @@ const Customers = () => {
 
       {showForm && (
         <CustomerForm
-          customer={editingCustomer}
+          customer={editingCustomer || null}
           onSubmit={handleFormSubmit}
           onClose={handleFormClose}
         />
