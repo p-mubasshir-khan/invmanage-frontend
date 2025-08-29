@@ -16,7 +16,7 @@ const Suppliers = () => {
 
   const fetchSuppliers = async () => {
     try {
-      const response = await axios.get('/api/suppliers');
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/suppliers`);
       setSuppliers(response.data);
     } catch (error) {
       console.error('Error fetching suppliers:', error);
@@ -39,7 +39,7 @@ const Suppliers = () => {
   const handleDeleteSupplier = async (supplierId) => {
     if (window.confirm('Are you sure you want to delete this supplier?')) {
       try {
-        await axios.delete(`/api/suppliers/${supplierId}`);
+        await axios.delete(`${process.env.REACT_APP_API_URL}/api/suppliers/${supplierId}`);
         setSuppliers(suppliers.filter(s => s.id !== supplierId));
         setMessage('Supplier deleted successfully');
         setTimeout(() => setMessage(''), 3000);
@@ -55,12 +55,12 @@ const Suppliers = () => {
     try {
       if (editingSupplier) {
         // Update existing supplier
-        const response = await axios.put(`/api/suppliers/${editingSupplier.id}`, supplierData);
+        const response = await axios.put(`${process.env.REACT_APP_API_URL}/api/suppliers/${editingSupplier.id}`, supplierData);
         setSuppliers(suppliers.map(s => s.id === editingSupplier.id ? response.data : s));
         setMessage('Supplier updated successfully');
       } else {
         // Create new supplier
-        const response = await axios.post('/api/suppliers', supplierData);
+        const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/suppliers`, supplierData);
         setSuppliers([...suppliers, response.data]);
         setMessage('Supplier added successfully');
       }
