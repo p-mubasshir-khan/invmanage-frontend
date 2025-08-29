@@ -18,9 +18,9 @@ const Orders = () => {
   const fetchData = async () => {
     try {
       const [ordersResponse, productsResponse, customersResponse] = await Promise.all([
-        axios.get('/api/orders'),
-        axios.get('/api/products'),
-        axios.get('/api/customers')
+        axios.get(`${process.env.REACT_APP_API_URL}/api/orders`),
+        axios.get(`${process.env.REACT_APP_API_URL}/api/products`),
+        axios.get(`${process.env.REACT_APP_API_URL}/api/customers`)
       ]);
       setOrders(ordersResponse.data);
       setProducts(productsResponse.data);
@@ -39,7 +39,7 @@ const Orders = () => {
 
   const handleFormSubmit = async (orderData) => {
     try {
-      const response = await axios.post('/api/orders', orderData);
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/orders`, orderData);
       setOrders([response.data, ...orders]);
       
       // Update product quantity in the products list
@@ -67,7 +67,7 @@ const Orders = () => {
 
   const handleDeleteOrder = async (orderId) => {
     try {
-      await axios.delete(`/api/orders/${orderId}`);
+      await axios.delete(`${process.env.REACT_APP_API_URL}/api/orders/${orderId}`);
       // Remove order locally
       const deleted = orders.find(o => o.id === orderId);
       setOrders(orders.filter(o => o.id !== orderId));
