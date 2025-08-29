@@ -3,7 +3,6 @@ import axios from 'axios';
 import './Dashboard.css';
 
 const Dashboard = () => {
-  // Initialize state safely
   const [dashboardData, setDashboardData] = useState({
     total_products: 0,
     low_stock_count: 0,
@@ -27,14 +26,17 @@ const Dashboard = () => {
         axios.get(lowStockUrl)
       ]);
 
-      // Set state safely with fallback defaults
       setDashboardData({
         total_products: dashboardResponse?.data?.total_products || 0,
         low_stock_count: dashboardResponse?.data?.low_stock_count || 0,
-        recent_orders: dashboardResponse?.data?.recent_orders || []
+        recent_orders: Array.isArray(dashboardResponse?.data?.recent_orders)
+          ? dashboardResponse.data.recent_orders
+          : []
       });
 
-      setLowStockProducts(lowStockResponse?.data || []);
+      setLowStockProducts(
+        Array.isArray(lowStockResponse?.data) ? lowStockResponse.data : []
+      );
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
       setError('Failed to load dashboard data. Please try again later.');
@@ -52,7 +54,9 @@ const Dashboard = () => {
 
   const totalProducts = dashboardData?.total_products || 0;
   const lowStockCount = dashboardData?.low_stock_count || 0;
-  const recentOrders = dashboardData?.recent_orders || [];
+  const recentOrders = Array.isArray(dashboardData?.recent_orders)
+    ? dashboardData.recent_orders
+    : [];
 
   return (
     <div className="dashboard">
@@ -78,7 +82,7 @@ const Dashboard = () => {
         {/* Low Stock Alerts */}
         <div className="card">
           <h2>Low Stock Alerts</h2>
-          {lowStockProducts.length > 0 ? (
+          {Array.isArray(lowStockProducts) && lowStockProducts.length > 0 ? (
             <table className="table">
               <thead>
                 <tr>
