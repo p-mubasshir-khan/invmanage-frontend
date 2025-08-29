@@ -16,7 +16,7 @@ const Products = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get('/api/products');
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/products`);
       setProducts(response.data);
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -39,7 +39,7 @@ const Products = () => {
   const handleDeleteProduct = async (productId) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
       try {
-        await axios.delete(`/api/products/${productId}`);
+        await axios.delete(`${process.env.REACT_APP_API_URL}/api/products/${productId}`);
         setProducts(products.filter(p => p.id !== productId));
         setMessage('Product deleted successfully');
         setTimeout(() => setMessage(''), 3000);
@@ -55,12 +55,12 @@ const Products = () => {
     try {
       if (editingProduct) {
         // Update existing product
-        const response = await axios.put(`/api/products/${editingProduct.id}`, productData);
+        const response = await axios.put(`${process.env.REACT_APP_API_URL}/api/products/${editingProduct.id}`, productData);
         setProducts(products.map(p => p.id === editingProduct.id ? response.data : p));
         setMessage('Product updated successfully');
       } else {
         // Create new product
-        const response = await axios.post('/api/products', productData);
+        const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/products`, productData);
         setProducts([...products, response.data]);
         setMessage('Product added successfully');
       }
