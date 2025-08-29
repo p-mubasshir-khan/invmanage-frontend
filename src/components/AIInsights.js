@@ -13,7 +13,7 @@ const AIInsights = () => {
 
   const fetchInsights = async () => {
     try {
-      const response = await axios.get('/api/ai-insights');
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/ai-insights`);
       setInsights(response.data);
     } catch (error) {
       console.error('Error fetching AI insights:', error);
