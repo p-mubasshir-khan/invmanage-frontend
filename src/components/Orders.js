@@ -6,8 +6,8 @@ import './Orders.css';
 const Orders = () => {
   const [orders, setOrders] = useState([]);
   const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [customers, setCustomers] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [message, setMessage] = useState('');
 
@@ -22,9 +22,10 @@ const Orders = () => {
         axios.get(`${process.env.REACT_APP_API_URL}/api/products`),
         axios.get(`${process.env.REACT_APP_API_URL}/api/customers`)
       ]);
-      setOrders(ordersResponse.data);
-      setProducts(productsResponse.data);
-      setCustomers(customersResponse.data);
+
+      setOrders(Array.isArray(ordersResponse?.data) ? ordersResponse.data : []);
+      setProducts(Array.isArray(productsResponse?.data) ? productsResponse.data : []);
+      setCustomers(Array.isArray(customersResponse?.data) ? customersResponse.data : []);
     } catch (error) {
       console.error('Error fetching data:', error);
       setMessage('Error loading data');
@@ -33,48 +34,48 @@ const Orders = () => {
     }
   };
 
-  const handleCreateOrder = () => {
-    setShowForm(true);
-  };
+  const handleCreateOrder = () => setShowForm(true);
 
   const handleFormSubmit = async (orderData) => {
+    if (!orderData) return;
     try {
       const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/orders`, orderData);
-      setOrders([response.data, ...orders]);
-      
-      // Update product quantity in the products list
-      const updatedProducts = products.map(product => {
-        if (product.id === orderData.product_id) {
-          return { ...product, quantity: product.quantity - orderData.quantity };
+      setOrders([response?.data, ...(orders || [])]);
+
+      const updatedProducts = (products || []).map(product => {
+        if (product?.id === orderData?.product_id) {
+          return { ...product, quantity: (product?.quantity || 0) - (orderData?.quantity || 0) };
         }
         return product;
       });
       setProducts(updatedProducts);
-      
+
       setShowForm(false);
       setMessage('Order created successfully');
       setTimeout(() => setMessage(''), 3000);
     } catch (error) {
       console.error('Error creating order:', error);
-      setMessage(error.response?.data?.error || 'Error creating order');
+      setMessage(error?.response?.data?.error || 'Error creating order');
       setTimeout(() => setMessage(''), 3000);
     }
   };
 
-  const handleFormClose = () => {
-    setShowForm(false);
-  };
+  const handleFormClose = () => setShowForm(false);
 
   const handleDeleteOrder = async (orderId) => {
+    if (!orderId) return;
     try {
       await axios.delete(`${process.env.REACT_APP_API_URL}/api/orders/${orderId}`);
-      // Remove order locally
-      const deleted = orders.find(o => o.id === orderId);
-      setOrders(orders.filter(o => o.id !== orderId));
-      // Restore product stock locally
+
+      const deleted = (orders || []).find(o => o?.id === orderId);
+      setOrders((orders || []).filter(o => o?.id !== orderId));
+
       if (deleted) {
-        setProducts(products.map(p => p.id === deleted.product_id ? { ...p, quantity: p.quantity + deleted.quantity } : p));
+        setProducts((products || []).map(p => 
+          p?.id === deleted?.product_id ? { ...p, quantity: (p?.quantity || 0) + (deleted?.quantity || 0) } : p
+        ));
       }
+
       setMessage('Order deleted successfully');
       setTimeout(() => setMessage(''), 3000);
     } catch (error) {
@@ -85,7 +86,7 @@ const Orders = () => {
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString();
+    return dateString ? new Date(dateString).toLocaleDateString() : '-';
   };
 
   if (loading) {
@@ -102,7 +103,7 @@ const Orders = () => {
       </div>
 
       {message && (
-        <div className={`alert ${message.includes('Error') ? 'alert-danger' : 'alert-success'}`}>
+        <div className={`alert ${message?.includes('Error') ? 'alert-danger' : 'alert-success'}`}>
           {message}
         </div>
       )}
@@ -121,18 +122,18 @@ const Orders = () => {
             </tr>
           </thead>
           <tbody>
-            {orders.map(order => (
-              <tr key={order.id}>
-                <td>#{order.id}</td>
-                <td>{order.product_name}</td>
-                <td>{order.quantity}</td>
-                <td>₹{order.total_amount.toFixed(2)}</td>
-                <td>{formatDate(order.created_at)}</td>
-                <td>{order.customer_name || '-'}</td>
+            {(Array.isArray(orders) ? orders : []).map(order => (
+              <tr key={order?.id || Math.random()}>
+                <td>#{order?.id ?? '-'}</td>
+                <td>{order?.product_name ?? '-'}</td>
+                <td>{order?.quantity ?? '-'}</td>
+                <td>₹{order?.total_amount?.toFixed(2) ?? '-'}</td>
+                <td>{formatDate(order?.created_at)}</td>
+                <td>{order?.customer_name ?? '-'}</td>
                 <td>
                   <button
                     className="btn btn-danger btn-sm"
-                    onClick={() => handleDeleteOrder(order.id)}
+                    onClick={() => handleDeleteOrder(order?.id)}
                   >
                     Delete
                   </button>
@@ -141,8 +142,8 @@ const Orders = () => {
             ))}
           </tbody>
         </table>
-        
-        {orders.length === 0 && (
+
+        {(Array.isArray(orders) ? orders : []).length === 0 && (
           <p style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
             No orders found. Create your first order!
           </p>
@@ -151,8 +152,8 @@ const Orders = () => {
 
       {showForm && (
         <OrderForm
-          products={products}
-          customers={customers}
+          products={products || []}
+          customers={customers || []}
           onSubmit={handleFormSubmit}
           onClose={handleFormClose}
         />
