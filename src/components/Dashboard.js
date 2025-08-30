@@ -23,6 +23,11 @@ const Dashboard = () => {
     return String(index + 1).padStart(3, '0'); // 001, 002, 003, etc.
   };
 
+  // Function to format order ID using permanent order_number
+  const formatOrderId = (orderNumber) => {
+    return `#${String(orderNumber).padStart(3, '0')}`;
+  };
+
   const fetchDashboardData = async () => {
     try {
       const dashboardUrl = `${getApiUrl()}/api/dashboard`;
@@ -147,7 +152,7 @@ const Dashboard = () => {
               <tbody>
                 {recentOrders.map((order, index) => (
                   <tr key={order?.id || Math.random()}>
-                    <td>#{generateOrderId(index)}</td>
+                    <td>{formatOrderId(order?.order_number)}</td>
                     <td>{order?.product_name || '-'}</td>
                     <td>{order?.quantity ?? '-'}</td>
                     <td>₹{order?.total_amount?.toFixed(2) ?? '0.00'}</td>
