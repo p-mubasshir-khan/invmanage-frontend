@@ -41,7 +41,7 @@ const Customers = () => {
     if (window.confirm('Are you sure you want to delete this customer?')) {
       try {
         await axios.delete(`${process.env.REACT_APP_API_URL}/api/customers/${customerId}`);
-        setCustomers((customers || []).filter(c => c?.id !== customerId));
+        setCustomers((customers || []).filter(c => c?._id !== customerId));
         setMessage('Customer deleted successfully');
         setTimeout(() => setMessage(''), 3000);
       } catch (error) {
@@ -55,12 +55,12 @@ const Customers = () => {
   const handleFormSubmit = async (customerData) => {
     if (!customerData) return;
     try {
-      if (editingCustomer?.id) {
+      if (editingCustomer?._id) {
         const response = await axios.put(
-          `${process.env.REACT_APP_API_URL}/api/customers/${editingCustomer.id}`,
+          `${process.env.REACT_APP_API_URL}/api/customers/${editingCustomer._id}`,
           customerData
         );
-        setCustomers((customers || []).map(c => (c?.id === editingCustomer.id ? response?.data : c)));
+        setCustomers((customers || []).map(c => (c?._id === editingCustomer._id ? response?.data : c)));
         setMessage('Customer updated successfully');
       } else {
         const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/customers`, customerData);
@@ -113,7 +113,7 @@ const Customers = () => {
           </thead>
           <tbody>
             {(Array.isArray(customers) ? customers : []).map(customer => (
-              <tr key={customer?.id || Math.random()}>
+              <tr key={customer?._id || Math.random()}>
                 <td>{customer?.name ?? '-'}</td>
                 <td>{customer?.contact ?? '-'}</td>
                 <td>{customer?.address ?? '-'}</td>
@@ -125,7 +125,7 @@ const Customers = () => {
                     Edit
                   </button>
                   <button
-                    onClick={() => handleDeleteCustomer(customer?.id)}
+                    onClick={() => handleDeleteCustomer(customer?._id)}
                     className="btn btn-danger btn-sm"
                     style={{ marginLeft: '8px' }}
                   >
