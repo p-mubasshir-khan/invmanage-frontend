@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { getApiUrl } from '../config';
 import OrderForm from './OrderForm';
 import './Orders.css';
 
@@ -18,9 +19,9 @@ const Orders = () => {
   const fetchData = async () => {
     try {
       const [ordersResponse, productsResponse, customersResponse] = await Promise.all([
-        axios.get(`${process.env.REACT_APP_API_URL}/api/orders`),
-        axios.get(`${process.env.REACT_APP_API_URL}/api/products`),
-        axios.get(`${process.env.REACT_APP_API_URL}/api/customers`)
+        axios.get(`${getApiUrl()}/api/orders`),
+        axios.get(`${getApiUrl()}/api/products`),
+        axios.get(`${getApiUrl()}/api/customers`)
       ]);
 
       setOrders(Array.isArray(ordersResponse?.data) ? ordersResponse.data : []);
@@ -39,12 +40,12 @@ const Orders = () => {
   const handleFormSubmit = async (orderData) => {
     if (!orderData) return;
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/orders`, orderData);
+      const response = await axios.post(`${getApiUrl()}/api/orders`, orderData);
       setOrders([response?.data, ...(orders || [])]);
 
       // update product stock
       const updatedProducts = (products || []).map(product => {
-        if (product?._id === orderData?.product_id) {
+        if (product?.id === orderData?.product_id) {
           return { ...product, quantity: (product?.quantity || 0) - (orderData?.quantity || 0) };
         }
         return product;
@@ -66,14 +67,14 @@ const Orders = () => {
   const handleDeleteOrder = async (orderId) => {
     if (!orderId) return;
     try {
-      await axios.delete(`${process.env.REACT_APP_API_URL}/api/orders/${orderId}`);
+      await axios.delete(`${getApiUrl()}/api/orders/${orderId}`);
 
-      const deleted = (orders || []).find(o => o?._id === orderId);
-      setOrders((orders || []).filter(o => o?._id !== orderId));
+      const deleted = (orders || []).find(o => o?.id === orderId);
+      setOrders((orders || []).filter(o => o?.id !== orderId));
 
       if (deleted) {
         setProducts((products || []).map(p => 
-          p?._id === deleted?.product_id 
+          p?.id === deleted?.product_id 
             ? { ...p, quantity: (p?.quantity || 0) + (deleted?.quantity || 0) } 
             : p
         ));
