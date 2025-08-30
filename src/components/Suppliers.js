@@ -37,20 +37,22 @@ const Suppliers = () => {
     setShowForm(true);
   };
 
-  const handleDeleteSupplier = async (supplierId) => {
-    if (!supplierId) return;
-    if (window.confirm('Are you sure you want to delete this supplier?')) {
-      try {
-        await axios.delete(`${getApiUrl()}/api/suppliers/${supplierId}`);
-        setSuppliers((suppliers || []).filter(s => s?.id !== supplierId));
-        setMessage('Supplier deleted successfully');
-        setTimeout(() => setMessage(''), 3000);
-      } catch (error) {
-        console.error('Error deleting supplier:', error);
-        setMessage('Error deleting supplier');
-        setTimeout(() => setMessage(''), 3000);
+ const handleDeleteSupplier = async (supplierId) => {
+  if (!supplierId) return;
+  if (window.confirm('Are you sure you want to delete this supplier?')) {
+    try {
+      await axios.delete(`${getApiUrl()}/api/suppliers/${supplierId}`);
+      setSuppliers((suppliers || []).filter(s => s?._id !== supplierId));
+      setMessage('Supplier deleted successfully');
+      setTimeout(() => setMessage(''), 3000);
+    } catch (error) {
+      console.error('Error deleting supplier:', error);
+      setMessage('Error deleting supplier');
+      setTimeout(() => setMessage(''), 3000);
     }
-  };
+  }
+};
+
 
   const handleFormSubmit = async (supplierData) => {
     if (!supplierData) return;
