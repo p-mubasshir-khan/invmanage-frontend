@@ -28,14 +28,21 @@ const Login = ({ onLogin }) => {
         credentials
       );
 
-      // ✅ Expecting backend to return JSON like { success: true, token: "...", username: "admin" }
-      if (response.data.success) {
-        onLogin(response.data);  // Pass data to parent (App.js or Dashboard)
+      const data = response.data;
+
+      // ✅ Handle multiple possible backend formats
+      if (data.success || data.message === "Login successful") {
+        // Save token if provided
+        if (data.token) {
+          localStorage.setItem("authToken", data.token);
+        }
+        // Notify parent component (App.js / Dashboard)
+        onLogin(data);
       } else {
-        setError(response.data.message || "Invalid username or password");
+        setError(data.message || "Invalid username or password");
       }
-    } catch (error) {
-      console.error("Login error:", error);
+    } catch (err) {
+      console.error("Login error:", err);
       setError("Login failed. Please try again.");
     } finally {
       setLoading(false);
@@ -80,18 +87,4 @@ const Login = ({ onLogin }) => {
             className="btn btn-primary login-btn"
             disabled={loading}
           >
-            {loading ? 'Logging in...' : 'Login'}
-          </button>
-        </form>
-        
-        <div className="login-info">
-          <p><strong>Demo Credentials:</strong></p>
-          <p>Username: admin</p>
-          <p>Password: password123</p>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default Login;
+            {loading
