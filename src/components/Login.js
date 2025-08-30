@@ -87,4 +87,12 @@ const Login = ({ onLogin }) => {
             className="btn btn-primary login-btn"
             disabled={loading}
           >
-            {loading
+            {loading ? "Loading..." : "Login"}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default Login;
