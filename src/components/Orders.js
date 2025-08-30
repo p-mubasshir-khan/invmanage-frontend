@@ -42,8 +42,9 @@ const Orders = () => {
       const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/orders`, orderData);
       setOrders([response?.data, ...(orders || [])]);
 
+      // update product stock
       const updatedProducts = (products || []).map(product => {
-        if (product?.id === orderData?.product_id) {
+        if (product?._id === orderData?.product_id) {
           return { ...product, quantity: (product?.quantity || 0) - (orderData?.quantity || 0) };
         }
         return product;
@@ -67,12 +68,14 @@ const Orders = () => {
     try {
       await axios.delete(`${process.env.REACT_APP_API_URL}/api/orders/${orderId}`);
 
-      const deleted = (orders || []).find(o => o?.id === orderId);
-      setOrders((orders || []).filter(o => o?.id !== orderId));
+      const deleted = (orders || []).find(o => o?._id === orderId);
+      setOrders((orders || []).filter(o => o?._id !== orderId));
 
       if (deleted) {
         setProducts((products || []).map(p => 
-          p?.id === deleted?.product_id ? { ...p, quantity: (p?.quantity || 0) + (deleted?.quantity || 0) } : p
+          p?._id === deleted?.product_id 
+            ? { ...p, quantity: (p?.quantity || 0) + (deleted?.quantity || 0) } 
+            : p
         ));
       }
 
@@ -123,8 +126,8 @@ const Orders = () => {
           </thead>
           <tbody>
             {(Array.isArray(orders) ? orders : []).map(order => (
-              <tr key={order?.id || Math.random()}>
-                <td>#{order?.id ?? '-'}</td>
+              <tr key={order?._id || Math.random()}>
+                <td>#{order?._id?.slice(-6) ?? '-'}</td>
                 <td>{order?.product_name ?? '-'}</td>
                 <td>{order?.quantity ?? '-'}</td>
                 <td>₹{order?.total_amount?.toFixed(2) ?? '-'}</td>
@@ -133,7 +136,7 @@ const Orders = () => {
                 <td>
                   <button
                     className="btn btn-danger btn-sm"
-                    onClick={() => handleDeleteOrder(order?.id)}
+                    onClick={() => handleDeleteOrder(order?._id)}
                   >
                     Delete
                   </button>
