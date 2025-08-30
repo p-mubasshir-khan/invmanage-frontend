@@ -18,7 +18,9 @@ const Products = () => {
   const fetchProducts = async () => {
     try {
       const response = await axios.get(`${getApiUrl()}/api/products`);
-      setProducts(Array.isArray(response?.data) ? response.data : []);
+      const productsData = Array.isArray(response?.data) ? response.data : [];
+      console.log('Fetched products data:', productsData); // Debug: See actual data structure
+      setProducts(productsData);
     } catch (error) {
       console.error('Error fetching products:', error);
       setMessage('Error loading products');
@@ -91,9 +93,21 @@ const Products = () => {
     <div className="products">
       <div className="products-header">
         <h1 className="page-title">Products</h1>
-        <button onClick={handleAddProduct} className="btn btn-primary">
-          Add Product
-        </button>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button onClick={handleAddProduct} className="btn btn-primary">
+            Add Product
+          </button>
+          <button 
+            onClick={() => {
+              console.log('Current products state:', products);
+              console.log('Sample product structure:', products[0]);
+            }} 
+            className="btn btn-outline"
+            style={{ fontSize: '12px' }}
+          >
+            Debug Data
+          </button>
+        </div>
       </div>
 
       {message && (
@@ -114,31 +128,34 @@ const Products = () => {
             </tr>
           </thead>
           <tbody>
-            {(Array.isArray(products) ? products : []).map(product => (
-              <tr key={product?._id}>
-                <td>{product?.name || '-'}</td>
-                <td className={product?.quantity < product?.reorderThreshold ? 'low-stock' : ''}>
-                  {product?.quantity ?? '-'}
-                </td>
-                <td>₹{product?.price ? product.price.toFixed(2) : '-'}</td>
-                <td>{product?.reorderThreshold ?? '-'}</td>
-                <td>
-                  <button
-                    onClick={() => handleEditProduct(product)}
-                    className="btn btn-primary btn-sm"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDeleteProduct(product?._id)}
-                    className="btn btn-danger btn-sm"
-                    style={{ marginLeft: '8px' }}
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
+            {(Array.isArray(products) ? products : []).map(product => {
+              console.log('Rendering product:', product); // Debug: See individual product data
+              return (
+                <tr key={product?.id}>
+                  <td>{product?.name || '-'}</td>
+                  <td className={product?.quantity < (product?.reorder_threshold || 0) ? 'low-stock' : ''}>
+                    {product?.quantity ?? '-'}
+                  </td>
+                  <td>₹{product?.price ? product.price.toFixed(2) : '-'}</td>
+                  <td>{product?.reorder_threshold || 'Not Set'}</td>
+                  <td>
+                    <button
+                      onClick={() => handleEditProduct(product)}
+                      className="btn btn-primary btn-sm"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDeleteProduct(product?.id)}
+                      className="btn btn-danger btn-sm"
+                      style={{ marginLeft: '8px' }}
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
