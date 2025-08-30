@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { getApiUrl } from '../config';
 import SupplierForm from './SupplierForm';
 import './Suppliers.css';
 
@@ -16,7 +17,7 @@ const Suppliers = () => {
 
   const fetchSuppliers = async () => {
     try {
-      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/suppliers`);
+      const response = await axios.get(`${getApiUrl()}/api/suppliers`);
       setSuppliers(Array.isArray(response?.data) ? response.data : []);
     } catch (error) {
       console.error('Error fetching suppliers:', error);
@@ -40,30 +41,29 @@ const Suppliers = () => {
     if (!supplierId) return;
     if (window.confirm('Are you sure you want to delete this supplier?')) {
       try {
-        await axios.delete(`${process.env.REACT_APP_API_URL}/api/suppliers/${supplierId}`);
-        setSuppliers((suppliers || []).filter(s => s?._id !== supplierId));
+        await axios.delete(`${getApiUrl()}/api/suppliers/${supplierId}`);
+        setSuppliers((suppliers || []).filter(s => s?.id !== supplierId));
         setMessage('Supplier deleted successfully');
         setTimeout(() => setMessage(''), 3000);
       } catch (error) {
         console.error('Error deleting supplier:', error);
         setMessage('Error deleting supplier');
         setTimeout(() => setMessage(''), 3000);
-      }
     }
   };
 
   const handleFormSubmit = async (supplierData) => {
     if (!supplierData) return;
     try {
-      if (editingSupplier?._id) {
+      if (editingSupplier?.id) {
         const response = await axios.put(
-          `${process.env.REACT_APP_API_URL}/api/suppliers/${editingSupplier._id}`,
+          `${getApiUrl()}/api/suppliers/${editingSupplier.id}`,
           supplierData
         );
-        setSuppliers((suppliers || []).map(s => (s?._id === editingSupplier._id ? response?.data : s)));
+        setSuppliers((suppliers || []).map(s => (s?.id === editingSupplier.id ? response?.data : s)));
         setMessage('Supplier updated successfully');
       } else {
-        const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/suppliers`, supplierData);
+        const response = await axios.post(`${getApiUrl()}/api/suppliers`, supplierData);
         setSuppliers([...(suppliers || []), response?.data]);
         setMessage('Supplier added successfully');
       }
