@@ -16,6 +16,32 @@ const Orders = () => {
     fetchData();
   }, []);
 
+  // Function to generate sequential order ID
+  const generateOrderId = (index) => {
+    return String(index + 1).padStart(3, '0'); // 001, 002, 003, etc.
+  };
+
+  // Test function to debug order creation
+  const testOrderCreation = async () => {
+    const testData = {
+      product_id: products[0]?.id,
+      quantity: 1,
+      customer_id: customers[0]?.id
+    };
+    console.log('Testing order creation with:', testData);
+    try {
+      const response = await axios.post(`${getApiUrl()}/api/orders`, testData);
+      console.log('Test order created:', response.data);
+      setMessage('Test order created successfully');
+      setTimeout(() => setMessage(''), 3000);
+      fetchData(); // Refresh the list
+    } catch (error) {
+      console.error('Test order failed:', error);
+      setMessage('Test order failed: ' + (error?.response?.data?.error || error.message));
+      setTimeout(() => setMessage(''), 5000);
+    }
+  };
+
   const fetchData = async () => {
     try {
       const [ordersResponse, productsResponse, customersResponse] = await Promise.all([
@@ -39,8 +65,24 @@ const Orders = () => {
 
   const handleFormSubmit = async (orderData) => {
     if (!orderData) return;
+    
+    // Validate order data before submission
+    console.log('Validating order data:', orderData);
+    if (!orderData.product_id) {
+      setMessage('Product is required');
+      setTimeout(() => setMessage(''), 3000);
+      return;
+    }
+    if (!orderData.quantity || orderData.quantity <= 0) {
+      setMessage('Valid quantity is required');
+      setTimeout(() => setMessage(''), 3000);
+      return;
+    }
+    
     try {
+      console.log('Submitting order data:', orderData); // Debug: See what's being sent
       const response = await axios.post(`${getApiUrl()}/api/orders`, orderData);
+      console.log('Order created successfully:', response.data); // Debug: See response
       setOrders([response?.data, ...(orders || [])]);
 
       // update product stock
@@ -57,8 +99,9 @@ const Orders = () => {
       setTimeout(() => setMessage(''), 3000);
     } catch (error) {
       console.error('Error creating order:', error);
+      console.error('Error response:', error?.response?.data); // Debug: See full error details
       setMessage(error?.response?.data?.error || 'Error creating order');
-      setTimeout(() => setMessage(''), 3000);
+      setTimeout(() => setMessage(''), 5000);
     }
   };
 
@@ -101,9 +144,22 @@ const Orders = () => {
     <div className="orders">
       <div className="orders-header">
         <h1 className="page-title">Orders</h1>
-        <button onClick={handleCreateOrder} className="btn btn-primary">
-          Create Order
-        </button>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button onClick={handleCreateOrder} className="btn btn-primary">
+            Create Order
+          </button>
+          <button onClick={fetchData} className="btn btn-outline">
+            Refresh
+          </button>
+          <button 
+            onClick={testOrderCreation} 
+            className="btn btn-outline"
+            style={{ fontSize: '12px' }}
+            disabled={!products.length || !customers.length}
+          >
+            Test Order
+          </button>
+        </div>
       </div>
 
       {message && (
@@ -126,9 +182,9 @@ const Orders = () => {
             </tr>
           </thead>
           <tbody>
-            {(Array.isArray(orders) ? orders : []).map(order => (
-              <tr key={order?._id || Math.random()}>
-                <td>#{order?._id?.slice(-6) ?? '-'}</td>
+            {(Array.isArray(orders) ? orders : []).map((order, index) => (
+              <tr key={order?.id || Math.random()}>
+                <td>#{generateOrderId(index)}</td>
                 <td>{order?.product_name ?? '-'}</td>
                 <td>{order?.quantity ?? '-'}</td>
                 <td>₹{order?.total_amount?.toFixed(2) ?? '-'}</td>
@@ -137,7 +193,7 @@ const Orders = () => {
                 <td>
                   <button
                     className="btn btn-danger btn-sm"
-                    onClick={() => handleDeleteOrder(order?._id)}
+                    onClick={() => handleDeleteOrder(order?.id)}
                   >
                     Delete
                   </button>
