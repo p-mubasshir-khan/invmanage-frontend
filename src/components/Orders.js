@@ -11,6 +11,7 @@ const Orders = () => {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [message, setMessage] = useState('');
+  const [creatingOrder, setCreatingOrder] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -79,29 +80,44 @@ const Orders = () => {
       return;
     }
     
+    setCreatingOrder(true); // Start loading
+    
     try {
       console.log('Submitting order data:', orderData); // Debug: See what's being sent
       const response = await axios.post(`${getApiUrl()}/api/orders`, orderData);
       console.log('Order created successfully:', response.data); // Debug: See response
-      setOrders([response?.data, ...(orders || [])]);
-
-      // update product stock
-      const updatedProducts = (products || []).map(product => {
-        if (product?.id === orderData?.product_id) {
-          return { ...product, quantity: (product?.quantity || 0) - (orderData?.quantity || 0) };
-        }
-        return product;
-      });
-      setProducts(updatedProducts);
-
+      
+      // Close form first
       setShowForm(false);
-      setMessage('Order created successfully');
+      
+      // Show success message
+      setMessage('Order created successfully! Refreshing orders list...');
+      
+      // Refresh the orders list to get the latest data
+      await fetchData();
+      
+      // Update success message
+      setMessage('Order created successfully!');
       setTimeout(() => setMessage(''), 3000);
+      
     } catch (error) {
       console.error('Error creating order:', error);
       console.error('Error response:', error?.response?.data); // Debug: See full error details
-      setMessage(error?.response?.data?.error || 'Error creating order');
+      
+      // Check if it's a network error or server error
+      if (error.response) {
+        // Server responded with error status
+        setMessage(error.response.data?.error || 'Server error creating order');
+      } else if (error.request) {
+        // Network error
+        setMessage('Network error. Please check your connection.');
+      } else {
+        // Other error
+        setMessage('Error creating order. Please try again.');
+      }
       setTimeout(() => setMessage(''), 5000);
+    } finally {
+      setCreatingOrder(false); // Stop loading
     }
   };
 
@@ -216,6 +232,7 @@ const Orders = () => {
           customers={customers || []}
           onSubmit={handleFormSubmit}
           onClose={handleFormClose}
+          isLoading={creatingOrder}
         />
       )}
     </div>
