@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { getApiUrl } from '../config';
 import './AIInsights.css';
 
 const AIInsights = () => {
@@ -13,7 +14,7 @@ const AIInsights = () => {
 
   const fetchInsights = async () => {
     try {
-      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/ai-insights`);
+      const response = await axios.get(`${getApiUrl()}/api/ai-insights`);
       setInsights(response?.data || {});
     } catch (err) {
       console.error('Error fetching AI insights:', err);
