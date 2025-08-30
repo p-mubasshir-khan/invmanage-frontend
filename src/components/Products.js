@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { getApiUrl } from '../config';
 import ProductForm from './ProductForm';
 import './Products.css';
 
@@ -16,7 +17,7 @@ const Products = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/products`);
+      const response = await axios.get(`${getApiUrl()}/api/products`);
       setProducts(Array.isArray(response?.data) ? response.data : []);
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -40,8 +41,8 @@ const Products = () => {
     if (!productId) return;
     if (window.confirm('Are you sure you want to delete this product?')) {
       try {
-        await axios.delete(`${process.env.REACT_APP_API_URL}/api/products/${productId}`);
-        setProducts(products?.filter(p => p?._id !== productId) || []);
+        await axios.delete(`${getApiUrl()}/api/products/${productId}`);
+        setProducts(products?.filter(p => p?.id !== productId) || []);
         setMessage('Product deleted successfully');
         setTimeout(() => setMessage(''), 3000);
       } catch (error) {
@@ -55,15 +56,15 @@ const Products = () => {
   const handleFormSubmit = async (productData) => {
     if (!productData) return;
     try {
-      if (editingProduct?._id) {
+      if (editingProduct?.id) {
         const response = await axios.put(
-          `${process.env.REACT_APP_API_URL}/api/products/${editingProduct._id}`,
+          `${getApiUrl()}/api/products/${editingProduct.id}`,
           productData
         );
-        setProducts(products?.map(p => (p?._id === editingProduct._id ? response?.data : p)) || []);
+        setProducts(products?.map(p => (p?.id === editingProduct.id ? response?.data : p)) || []);
         setMessage('Product updated successfully');
       } else {
-        const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/products`, productData);
+        const response = await axios.post(`${getApiUrl()}/api/products`, productData);
         setProducts([...(products || []), response?.data]);
         setMessage('Product added successfully');
       }
