@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { getApiUrl } from '../config';
 import './Dashboard.css';
@@ -16,6 +17,11 @@ const Dashboard = () => {
   useEffect(() => {
     fetchDashboardData();
   }, []);
+
+  // Function to generate sequential order ID (same as Orders component)
+  const generateOrderId = (index) => {
+    return String(index + 1).padStart(3, '0'); // 001, 002, 003, etc.
+  };
 
   const fetchDashboardData = async () => {
     try {
@@ -109,7 +115,24 @@ const Dashboard = () => {
 
         {/* Recent Orders */}
         <div className="card">
-          <h2>Recent Orders</h2>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <h2>Recent Orders</h2>
+            <Link to="/orders" className="btn btn-outline" style={{ fontSize: '12px', textDecoration: 'none' }}>
+              View All Orders →
+            </Link>
+          </div>
+          <div style={{ 
+            backgroundColor: '#f8f9fa', 
+            border: '1px solid #dee2e6', 
+            borderRadius: '4px', 
+            padding: '8px', 
+            marginBottom: '12px',
+            fontSize: '12px',
+            color: '#6c757d'
+          }}>
+            <strong>ℹ️  Note:</strong> Order IDs shown are display numbers for the 5 most recent orders. 
+            For the complete order list with full details, visit the Orders page.
+          </div>
           {recentOrders.length > 0 ? (
             <table className="table">
               <thead>
@@ -122,9 +145,9 @@ const Dashboard = () => {
                 </tr>
               </thead>
               <tbody>
-                {recentOrders.map((order) => (
+                {recentOrders.map((order, index) => (
                   <tr key={order?.id || Math.random()}>
-                    <td>#{order?.id || '-'}</td>
+                    <td>#{generateOrderId(index)}</td>
                     <td>{order?.product_name || '-'}</td>
                     <td>{order?.quantity ?? '-'}</td>
                     <td>₹{order?.total_amount?.toFixed(2) ?? '0.00'}</td>
