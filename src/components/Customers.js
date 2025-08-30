@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { getApiUrl } from '../config';
 import CustomerForm from './CustomerForm';
 import './Customers.css';
 
@@ -16,7 +17,7 @@ const Customers = () => {
 
   const fetchCustomers = async () => {
     try {
-      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/customers`);
+      const response = await axios.get(`${getApiUrl()}/api/customers`);
       setCustomers(Array.isArray(response?.data) ? response.data : []);
     } catch (error) {
       console.error('Error fetching customers:', error);
@@ -40,8 +41,8 @@ const Customers = () => {
     if (!customerId) return;
     if (window.confirm('Are you sure you want to delete this customer?')) {
       try {
-        await axios.delete(`${process.env.REACT_APP_API_URL}/api/customers/${customerId}`);
-        setCustomers((customers || []).filter(c => c?._id !== customerId));
+        await axios.delete(`${getApiUrl()}/api/customers/${customerId}`);
+        setCustomers((customers || []).filter(c => c?.id !== customerId));
         setMessage('Customer deleted successfully');
         setTimeout(() => setMessage(''), 3000);
       } catch (error) {
@@ -55,15 +56,15 @@ const Customers = () => {
   const handleFormSubmit = async (customerData) => {
     if (!customerData) return;
     try {
-      if (editingCustomer?._id) {
+      if (editingCustomer?.id) {
         const response = await axios.put(
-          `${process.env.REACT_APP_API_URL}/api/customers/${editingCustomer._id}`,
+          `${getApiUrl()}/api/customers/${editingCustomer.id}`,
           customerData
         );
-        setCustomers((customers || []).map(c => (c?._id === editingCustomer._id ? response?.data : c)));
+        setCustomers((customers || []).map(c => (c?.id === editingCustomer.id ? response?.data : c)));
         setMessage('Customer updated successfully');
       } else {
-        const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/customers`, customerData);
+        const response = await axios.post(`${getApiUrl()}/api/customers`, customerData);
         setCustomers([...(customers || []), response?.data]);
         setMessage('Customer added successfully');
       }
