@@ -41,7 +41,7 @@ const Products = () => {
     if (window.confirm('Are you sure you want to delete this product?')) {
       try {
         await axios.delete(`${process.env.REACT_APP_API_URL}/api/products/${productId}`);
-        setProducts(products?.filter(p => p?.id !== productId) || []);
+        setProducts(products?.filter(p => p?._id !== productId) || []);
         setMessage('Product deleted successfully');
         setTimeout(() => setMessage(''), 3000);
       } catch (error) {
@@ -55,12 +55,12 @@ const Products = () => {
   const handleFormSubmit = async (productData) => {
     if (!productData) return;
     try {
-      if (editingProduct?.id) {
+      if (editingProduct?._id) {
         const response = await axios.put(
-          `${process.env.REACT_APP_API_URL}/api/products/${editingProduct.id}`,
+          `${process.env.REACT_APP_API_URL}/api/products/${editingProduct._id}`,
           productData
         );
-        setProducts(products?.map(p => (p?.id === editingProduct.id ? response?.data : p)) || []);
+        setProducts(products?.map(p => (p?._id === editingProduct._id ? response?.data : p)) || []);
         setMessage('Product updated successfully');
       } else {
         const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/products`, productData);
@@ -114,12 +114,12 @@ const Products = () => {
           </thead>
           <tbody>
             {(Array.isArray(products) ? products : []).map(product => (
-              <tr key={product?.id || Math.random()}>
+              <tr key={product?._id}>
                 <td>{product?.name || '-'}</td>
                 <td className={product?.quantity < product?.reorder_threshold ? 'low-stock' : ''}>
                   {product?.quantity ?? '-'}
                 </td>
-                <td>₹{product?.price?.toFixed(2) ?? '-'}</td>
+                <td>₹{product?.price ? product.price.toFixed(2) : '-'}</td>
                 <td>{product?.reorder_threshold ?? '-'}</td>
                 <td>
                   <button
@@ -129,7 +129,7 @@ const Products = () => {
                     Edit
                   </button>
                   <button
-                    onClick={() => handleDeleteProduct(product?.id)}
+                    onClick={() => handleDeleteProduct(product?._id)}
                     className="btn btn-danger btn-sm"
                     style={{ marginLeft: '8px' }}
                   >
