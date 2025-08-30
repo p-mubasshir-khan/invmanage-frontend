@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { getApiUrl } from '../config';
 import './Login.css';
 
 const Login = ({ onLogin }) => {
@@ -24,7 +25,7 @@ const Login = ({ onLogin }) => {
 
     try {
       const response = await axios.post(
-        "https://invmanage-backend.onrender.com/api/login",
+        `${getApiUrl()}/api/login`,
         credentials
       );
 
