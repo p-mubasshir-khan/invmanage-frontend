@@ -17,9 +17,14 @@ const Orders = () => {
     fetchData();
   }, []);
 
-  // Function to generate sequential order ID
+  // Function to generate sequential order ID (same as Orders component)
   const generateOrderId = (index) => {
     return String(index + 1).padStart(3, '0'); // 001, 002, 003, etc.
+  };
+
+  // Function to format order ID using permanent order_number
+  const formatOrderId = (orderNumber) => {
+    return `#${String(orderNumber).padStart(3, '0')}`;
   };
 
   // Test function to debug order creation
@@ -221,7 +226,7 @@ const Orders = () => {
           <tbody>
             {(Array.isArray(orders) ? orders : []).map((order, index) => (
               <tr key={order?.id || Math.random()}>
-                <td>#{generateOrderId(index)}</td>
+                <td>{formatOrderId(order?.order_number)}</td>
                 <td>{order?.product_name ?? '-'}</td>
                 <td>{order?.quantity ?? '-'}</td>
                 <td>₹{order?.total_amount?.toFixed(2) ?? '-'}</td>
