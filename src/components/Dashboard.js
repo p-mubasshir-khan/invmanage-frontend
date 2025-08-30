@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { getApiUrl } from '../config';
 import './Dashboard.css';
 
 const Dashboard = () => {
@@ -18,8 +19,8 @@ const Dashboard = () => {
 
   const fetchDashboardData = async () => {
     try {
-      const dashboardUrl = `${process.env.REACT_APP_API_URL}/api/dashboard`;
-      const lowStockUrl = `${process.env.REACT_APP_API_URL}/api/dashboard/low-stock`;
+      const dashboardUrl = `${getApiUrl()}/api/dashboard`;
+      const lowStockUrl = `${getApiUrl()}/api/dashboard/low-stock`;
 
       const [dashboardResponse, lowStockResponse] = await Promise.all([
         axios.get(dashboardUrl),
