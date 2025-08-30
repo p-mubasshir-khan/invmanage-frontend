@@ -125,19 +125,26 @@ const Orders = () => {
 
   const handleDeleteOrder = async (orderId) => {
     if (!orderId) return;
+    
+    // Show confirmation dialog explaining the behavior
+    const confirmed = window.confirm(
+      'Are you sure you want to delete this order?\n\n' +
+      '⚠️  IMPORTANT: Deleting this order will NOT restore the product quantity to inventory.\n' +
+      'The products were already physically given to the customer.\n\n' +
+      'This action will only remove the order record from the system.'
+    );
+    
+    if (!confirmed) return;
+    
     try {
       await axios.delete(`${getApiUrl()}/api/orders/${orderId}`);
 
-      const deleted = (orders || []).find(o => o?.id === orderId);
+      // Remove the order from the local state
       setOrders((orders || []).filter(o => o?.id !== orderId));
 
-      if (deleted) {
-        setProducts((products || []).map(p => 
-          p?.id === deleted?.product_id 
-            ? { ...p, quantity: (p?.quantity || 0) + (deleted?.quantity || 0) } 
-            : p
-        ));
-      }
+      // IMPORTANT: Do NOT restore product quantity when deleting orders
+      // This would create phantom inventory since the products were already physically given to the customer
+      // The order deletion should only remove the order record, not affect inventory levels
 
       setMessage('Order deleted successfully');
       setTimeout(() => setMessage(''), 3000);
@@ -185,6 +192,20 @@ const Orders = () => {
       )}
 
       <div className="card">
+        <div style={{ 
+          backgroundColor: '#f8f9fa', 
+          border: '1px solid #dee2e6', 
+          borderRadius: '4px', 
+          padding: '12px', 
+          marginBottom: '16px',
+          fontSize: '14px',
+          color: '#6c757d'
+        }}>
+          <strong>ℹ️  Important Note:</strong> Deleting an order will only remove the order record from the system. 
+          It will <strong>NOT</strong> restore the product quantity to inventory since the products were already 
+          physically given to the customer. This prevents phantom inventory and maintains accurate stock levels.
+        </div>
+        
         <table className="table">
           <thead>
             <tr>
