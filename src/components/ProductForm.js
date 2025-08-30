@@ -12,10 +12,18 @@ const ProductForm = ({ product, onSubmit, onClose }) => {
   useEffect(() => {
     if (product) {
       setFormData({
-        name: product.name,
-        quantity: product.quantity,
-        price: product.price,
-        reorder_threshold: product.reorder_threshold
+        name: product.name || '',
+        quantity: product.quantity || 0,
+        price: product.price || 0,
+        reorder_threshold: product.reorder_threshold || 10
+      });
+    } else {
+      // Reset to defaults when adding new product
+      setFormData({
+        name: '',
+        quantity: 0,
+        price: 0,
+        reorder_threshold: 10
       });
     }
   }, [product]);
