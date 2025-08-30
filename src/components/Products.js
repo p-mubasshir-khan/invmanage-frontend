@@ -116,11 +116,11 @@ const Products = () => {
             {(Array.isArray(products) ? products : []).map(product => (
               <tr key={product?._id}>
                 <td>{product?.name || '-'}</td>
-                <td className={product?.quantity < product?.reorder_threshold ? 'low-stock' : ''}>
+                <td className={product?.quantity < product?.reorderThreshold ? 'low-stock' : ''}>
                   {product?.quantity ?? '-'}
                 </td>
                 <td>₹{product?.price ? product.price.toFixed(2) : '-'}</td>
-                <td>{product?.reorder_threshold ?? '-'}</td>
+                <td>{product?.reorderThreshold ?? '-'}</td>
                 <td>
                   <button
                     onClick={() => handleEditProduct(product)}
