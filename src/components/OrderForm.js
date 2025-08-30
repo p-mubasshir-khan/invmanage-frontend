@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './OrderForm.css';
 
-const OrderForm = ({ products, customers, onSubmit, onClose }) => {
+const OrderForm = ({ products, customers, onSubmit, onClose, isLoading = false }) => {
   const [formData, setFormData] = useState({
     product_id: '',
     quantity: 1,
@@ -25,7 +25,7 @@ const OrderForm = ({ products, customers, onSubmit, onClose }) => {
     const { name, value } = e.target;
     let parsedValue = value;
     if (name === 'product_id' || name === 'customer_id') {
-      parsedValue = parseInt(value);
+      parsedValue = value; // Keep as string for MongoDB ObjectId
     } else if (name === 'quantity') {
       parsedValue = parseInt(value) || 1;
     }
@@ -35,7 +35,7 @@ const OrderForm = ({ products, customers, onSubmit, onClose }) => {
     });
 
     if (name === 'product_id') {
-      const product = products.find(p => p.id === parseInt(value));
+      const product = products.find(p => p.id === value);
       setSelectedProduct(product);
     }
   };
@@ -67,11 +67,11 @@ const OrderForm = ({ products, customers, onSubmit, onClose }) => {
               onChange={handleChange}
               required
             >
-                             {products.map(product => (
-                 <option key={product.id} value={product.id}>
-                   {product.name} - ₹{product.price.toFixed(2)} (Stock: {product.quantity})
-                 </option>
-               ))}
+              {products.map(product => (
+                <option key={product.id} value={product.id}>
+                  {product.name} - ₹{product.price.toFixed(2)} (Stock: {product.quantity})
+                </option>
+              ))}
             </select>
           </div>
 
@@ -117,12 +117,12 @@ const OrderForm = ({ products, customers, onSubmit, onClose }) => {
             <div className="order-summary">
               <h3>Order Summary</h3>
               <p><strong>Product:</strong> {selectedProduct.name}</p>
-                             <p><strong>Price per unit:</strong> ₹{selectedProduct.price.toFixed(2)}</p>
+              <p><strong>Price per unit:</strong> ₹{selectedProduct.price.toFixed(2)}</p>
               <p><strong>Quantity:</strong> {formData.quantity}</p>
               {formData.customer_id && (
                 <p><strong>Customer:</strong> {customers?.find(c => c.id === formData.customer_id)?.name}</p>
               )}
-               <p><strong>Total Amount:</strong> ₹{(selectedProduct.price * formData.quantity).toFixed(2)}</p>
+              <p><strong>Total Amount:</strong> ₹{(selectedProduct.price * formData.quantity).toFixed(2)}</p>
             </div>
           )}
           
@@ -133,9 +133,9 @@ const OrderForm = ({ products, customers, onSubmit, onClose }) => {
             <button 
               type="submit" 
               className="btn btn-primary"
-              disabled={formData.quantity > getMaxQuantity()}
+              disabled={formData.quantity > getMaxQuantity() || isLoading}
             >
-              Create Order
+              {isLoading ? 'Creating Order...' : 'Create Order'}
             </button>
           </div>
         </form>
